@@ -55,7 +55,6 @@ def initialize_session_state():
             model_name="gpt-3.5-turbo-16k",
             max_tokens=10000,
             request_timeout=120,
-            
         )
     if "conversation" not in st.session_state:
         # create a connection to OpenAI text-generation API
