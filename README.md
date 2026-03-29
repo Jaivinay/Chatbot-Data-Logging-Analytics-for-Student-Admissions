@@ -1,4 +1,6 @@
 🤖 LangChain Chatbot – AI-Powered BAIS Academic Assistant
+
+
 📌 Overview
 
 This project focuses on developing an LLM-based chatbot to support the MS Business Analytics and Information Systems (BAIS) program at the Muma College of Business. The chatbot leverages OpenAI GPT models, LangChain, and a Pinecone vector database to provide accurate, context-aware responses to student queries.
@@ -23,6 +25,7 @@ Query is embedded and matched against Pinecone vector database
 Relevant context is retrieved (RAG pipeline)
 Context + query is passed to OpenAI GPT model
 Model generates a context-aware response
+
 🛠️ Tech Stack
 Language: Python
 LLM Framework: LangChain
@@ -36,6 +39,8 @@ Reduced manual query handling for the Graduate Coordinator
 Improved response time and consistency for student queries
 Enabled 24/7 academic support for BAIS students
 Enhanced overall student experience and program efficiency
+
+
 📂 Use Case
 
 This chatbot is designed to handle a wide range of academic queries including:
@@ -49,6 +54,7 @@ Building end-to-end RAG pipelines
 Integrating LLMs with external knowledge bases
 Designing effective prompts for domain-specific tasks
 Deploying AI applications with real-time user interaction
+
 ⚠️ Note
 
 Due to data privacy and institutional constraints, the dataset used for this project is not publicly shared.
@@ -58,8 +64,5 @@ Fine-tuned domain-specific LLM
 Multi-turn conversational memory
 Integration with university systems (APIs)
 Voice-based interaction
-🤝 Contributions
-
-Open to feedback and improvements. Feel free to fork and contribute!
 
 ⭐ If you found this project useful, consider giving it a star!
