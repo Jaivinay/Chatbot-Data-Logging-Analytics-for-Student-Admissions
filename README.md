@@ -1,88 +1,60 @@
-# LangChain Chatbot – AI-Powered BAIS Academic Assistant
+# Rocky the Bull · Student Admissions Chatbot
 
-## Overview
+Rocky answers questions about admissions, courses, enrollment, and student support for the University of South Florida's MS in Business Analytics and Information Systems program. Streamlit runs the chat interface, Ollama generates embeddings and answers, and Pinecone retrieves passages from the admissions knowledge base. SQLite stores chat transcripts, optional student registration details, and feedback.
 
-This project focuses on developing an LLM-based chatbot to support the MS Business Analytics and Information Systems (BAIS) program at the Muma College of Business. The chatbot leverages OpenAI GPT models, LangChain, and a Pinecone vector database to provide accurate, context-aware responses to student queries.
+## Set up and run
 
-The objective is to automate and streamline student support, reduce manual workload for the Graduate Coordinator, and improve response speed and consistency.
+Use Python 3.12 or newer and [Ollama](https://ollama.com/download). Start the Ollama app or run `ollama serve`, then download the models in a separate terminal.
 
----
+```bash
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
+```
 
-## Key Features
+Create a virtual environment and install the pinned dependencies in the repository directory. If you already have a `.env` file, keep it and compare its settings with `.env.example`.
 
-* LLM-based chatbot using OpenAI GPT API
-* Retrieval-Augmented Generation (RAG) with Pinecone vector database
-* Semantic search for context-aware responses
-* Prompt engineering for structured and accurate outputs
-* Streamlit-based user interface for real-time interaction
-* Integration of structured and unstructured data sources
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+cp -n .env.example .env
+```
 
----
+On Windows, activate the environment with `.venv\Scripts\Activate.ps1` and copy the configuration file with `Copy-Item .env.example .env` when `.env` is absent.
 
-## Supported Query Types
+Set `PINECONE_API_KEY` in `.env`. Set `PINECONE_INDEX_NAME` and `PINECONE_NAMESPACE` to match your knowledge base. The defaults are `student-admissions-ollama` and `__default__`. For a fresh knowledge base, ingest documents before asking questions.
 
-* Admissions information
-* Courses and curriculum
-* Program structure and requirements
-* General student support queries
+```bash
+python -m streamlit run chatbot.py
+```
 
----
+## Load admissions documents
 
-## Architecture
+The repository includes a concise knowledge file built from official USF admissions pages. To preview and upload it, run:
 
-1. User submits a query through the Streamlit interface
-2. Query is converted into embeddings
-3. Pinecone vector database retrieves relevant context
-4. Retrieved context is combined with the query (RAG pipeline)
-5. OpenAI GPT model generates a context-aware response
+```bash
+python ingest.py --dry-run
+python ingest.py
+```
 
----
+The first command previews how many chunks are ready. The second embeds and uploads them. With no paths specified, the script reads existing `knowledge/`, `texts/`, and `pdfs/` directories. You can also pass your own PDF, Markdown, text file, or directory. For example, use `python ingest.py ~/Documents/usf-admissions` after replacing that example with a location that exists on your computer.
 
-## Tech Stack
+Add `--create-index` when the configured index does not exist. The script declares an `embedding` field sized to the configured Ollama model. The chatbot reads `chunk_text` and `title` from each match. See [Pinecone's document index documentation](https://sdk.pinecone.io/python/how-to/documents/schema-and-upsert.html).
 
-* Python
-* LangChain
-* OpenAI GPT API
-* Pinecone Vector Database
-* Streamlit
-* Semantic Search and Prompt Engineering
+Ingestion upserts stable chunk IDs based on file path, page, and position. Reruns can resume an interrupted upload. Ingestion leaves existing records outside the uploaded IDs in place, so use a fresh namespace for a full corpus replacement or an embedding model change. If the new model has a different vector dimension, use a new index. Keep the chat and ingestion settings in sync.
 
----
+## Local records and email
 
-## Business Impact
+The app initializes `student_chat_history.sqlite3` automatically. Set `CHAT_HISTORY_DB` in `.env` to use another path. The database check reports integrity and counts.
 
-* Reduced manual query handling for academic staff
-* Improved response time and consistency
-* Enabled 24/7 academic support
-* Enhanced student experience and operational efficiency
+```bash
+python check_database.py
+python initialize_database.py --legacy-db
+```
 
----
+Run the second command only when migrating from the legacy `chat_history.db`. Add `--seed-csv` to import the historical CSV. Each option also accepts a custom source path. Imports preserve existing student profiles and skip previously imported transcripts. Imported timestamps record when the migration ran because the legacy records have no timestamps.
 
-## Use Case
+Registration is optional and intended for local demos with fictional student details. SQLite retains questions, answers, source excerpts, and feedback. Pinecone receives the search embedding, and Ollama receives the question and retrieved passages.
 
-The chatbot is designed to assist students by answering queries related to program details, course requirements, admission processes, and general FAQs for the BAIS program.
-
----
-
-## Key Learnings
-
-* Built end-to-end RAG pipelines using LangChain
-* Integrated LLMs with vector databases
-* Designed domain-specific prompt strategies
-* Developed real-time AI applications with Streamlit
-
----
-
-## Future Improvements
-
-* Fine-tuned domain-specific language models
-* Multi-turn conversational memory
-* Integration with university systems via APIs
-* Voice-enabled interaction
-
----
-
-## Note
-
-Due to data privacy and institutional constraints, the dataset used in this project is not publicly available.
-
+Email is disabled by default. To enable it, set `ENABLE_EMAIL_NOTIFICATIONS=true` and configure the SMTP variables in `.env.example`. Port 587 uses STARTTLS and port 465 uses implicit TLS. Rotate any SMTP credentials previously stored in Git.
